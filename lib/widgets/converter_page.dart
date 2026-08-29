@@ -50,6 +50,18 @@ class _ConverterPageState extends State<ConverterPage> {
     setState(() => _toUnit = newUnit);
   }
 
+  /// Swaps the "from" and "to" units. Always valid since [_toUnit] is
+  /// already guaranteed to share [_fromUnit]'s category.
+  void _swapUnits() {
+    setState(() {
+      final previousFrom = _fromUnit;
+      _fromUnit = _toUnit;
+      _toUnit = previousFrom;
+      _resultText = null;
+      _errorText = null;
+    });
+  }
+
   void _convert() {
     final double? inputValue = double.tryParse(_valueController.text);
     setState(() {
@@ -68,62 +80,111 @@ class _ConverterPageState extends State<ConverterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('Measures Converter')),
+      appBar: AppBar(
+        centerTitle: true,
+        title: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.straighten),
+            SizedBox(width: 8),
+            Text('Measures Converter'),
+          ],
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const _SectionLabel('Value'),
-              TextField(
-                controller: _valueController,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                  signed: true,
-                ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          child: Card(
+            elevation: 3,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 28,
               ),
-              const SizedBox(height: 24),
-              const _SectionLabel('From'),
-              _UnitDropdown(
-                key: const Key('fromUnitDropdown'),
-                value: _fromUnit,
-                units: Unit.values,
-                onChanged: _onFromUnitChanged,
-              ),
-              const SizedBox(height: 24),
-              const _SectionLabel('To'),
-              _UnitDropdown(
-                key: const Key('toUnitDropdown'),
-                value: _toUnit,
-                units: _fromUnit.compatibleUnits,
-                onChanged: _onToUnitChanged,
-              ),
-              const SizedBox(height: 24),
-              Center(
-                child: ElevatedButton(
-                  onPressed: _convert,
-                  child: const Text('Convert'),
-                ),
-              ),
-              const SizedBox(height: 24),
-              if (_errorText != null)
-                Center(
-                  child: Text(
-                    _errorText!,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const _SectionLabel('Value'),
+                  TextField(
+                    controller: _valueController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                      signed: true,
+                    ),
+                    decoration: const InputDecoration(
+                      labelText: 'Enter a value',
+                      prefixIcon: Icon(Icons.numbers),
+                      filled: true,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
+                    ),
                   ),
-                ),
-              if (_resultText != null)
-                Center(
-                  child: Text(
-                    _resultText!,
-                    style: Theme.of(context).textTheme.titleLarge,
-                    textAlign: TextAlign.center,
+                  const SizedBox(height: 24),
+                  const _SectionLabel('From'),
+                  _UnitDropdown(
+                    key: const Key('fromUnitDropdown'),
+                    value: _fromUnit,
+                    units: Unit.values,
+                    onChanged: _onFromUnitChanged,
                   ),
-                ),
-            ],
+                  const SizedBox(height: 12),
+                  Center(
+                    child: IconButton.filledTonal(
+                      onPressed: _swapUnits,
+                      tooltip: 'Swap units',
+                      icon: const Icon(Icons.swap_vert),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const _SectionLabel('To'),
+                  _UnitDropdown(
+                    key: const Key('toUnitDropdown'),
+                    value: _toUnit,
+                    units: _fromUnit.compatibleUnits,
+                    onChanged: _onToUnitChanged,
+                  ),
+                  const SizedBox(height: 28),
+                  ElevatedButton(
+                    onPressed: _convert,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey.shade200,
+                      foregroundColor: colorScheme.primary,
+                      elevation: 3,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Convert'),
+                  ),
+                  const SizedBox(height: 24),
+                  if (_errorText != null)
+                    _ResultBanner(
+                      text: _errorText!,
+                      icon: Icons.error_outline,
+                      backgroundColor: colorScheme.errorContainer,
+                      foregroundColor: colorScheme.onErrorContainer,
+                    ),
+                  if (_resultText != null)
+                    _ResultBanner(
+                      text: _resultText!,
+                      icon: Icons.check_circle,
+                      backgroundColor: colorScheme.primaryContainer,
+                      foregroundColor: colorScheme.onPrimaryContainer,
+                    ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -150,6 +211,58 @@ class _SectionLabel extends StatelessWidget {
   }
 }
 
+/// A colored, rounded banner used to show the conversion result or an
+/// input error, with a leading icon reinforcing success/failure.
+class _ResultBanner extends StatelessWidget {
+  const _ResultBanner({
+    required this.text,
+    required this.icon,
+    required this.backgroundColor,
+    required this.foregroundColor,
+  });
+
+  final String text;
+  final IconData icon;
+  final Color backgroundColor;
+  final Color foregroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: foregroundColor),
+          const SizedBox(height: 8),
+          Text(
+            text,
+            textAlign: TextAlign.center,
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(color: foregroundColor),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Icon representing a [MeasurementCategory], used to give each dropdown a
+/// quick visual cue of which family of units it's showing.
+IconData _categoryIcon(MeasurementCategory category) {
+  switch (category) {
+    case MeasurementCategory.length:
+      return Icons.straighten;
+    case MeasurementCategory.weight:
+      return Icons.scale;
+  }
+}
+
 /// A full-width dropdown for selecting a [Unit] from a given list.
 class _UnitDropdown extends StatelessWidget {
   const _UnitDropdown({
@@ -172,6 +285,13 @@ class _UnitDropdown extends StatelessWidget {
       initialValue: value,
       isExpanded: true,
       style: unitTextStyle,
+      decoration: InputDecoration(
+        prefixIcon: Icon(_categoryIcon(value.category)),
+        filled: true,
+        border: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+        ),
+      ),
       items: [
         for (final unit in units)
           DropdownMenuItem(
