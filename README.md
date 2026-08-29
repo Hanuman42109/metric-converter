@@ -9,7 +9,7 @@ A small Flutter app for converting values between units of **length** and **weig
 - Weight: milligrams, grams, kilograms, ounces, pounds
 - The "To" dropdown only shows units compatible with the selected "From" category
 - Swap the "From" and "To" units with one tap
-- Runs on web and Windows desktop
+- Runs on Android, web, and Windows desktop
 
 ## Project structure
 
@@ -25,7 +25,7 @@ Requires the [Flutter SDK](https://docs.flutter.dev/get-started/install).
 
 ```bash
 flutter pub get
-flutter run           # pick a device, e.g. Chrome or Windows
+flutter run           # pick a device, e.g. an Android emulator, Chrome, or Windows
 ```
 
 Run tests:
