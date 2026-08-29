@@ -8,6 +8,7 @@ A small Flutter app for converting values between units of **length** and **weig
 - Length: millimeters, centimeters, meters, kilometers, inches, feet, yards, miles
 - Weight: milligrams, grams, kilograms, ounces, pounds
 - The "To" dropdown only shows units compatible with the selected "From" category
+- Swap the "From" and "To" units with one tap
 - Runs on web and Windows desktop
 
 ## Project structure
