@@ -84,14 +84,7 @@ class _ConverterPageState extends State<ConverterPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.straighten),
-            SizedBox(width: 8),
-            Text('Measures Converter'),
-          ],
-        ),
+        title: const Text('Measures Converter'),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -118,7 +111,6 @@ class _ConverterPageState extends State<ConverterPage> {
                     ),
                     decoration: const InputDecoration(
                       labelText: 'Enter a value',
-                      prefixIcon: Icon(Icons.numbers),
                       filled: true,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -252,17 +244,6 @@ class _ResultBanner extends StatelessWidget {
   }
 }
 
-/// Icon representing a [MeasurementCategory], used to give each dropdown a
-/// quick visual cue of which family of units it's showing.
-IconData _categoryIcon(MeasurementCategory category) {
-  switch (category) {
-    case MeasurementCategory.length:
-      return Icons.straighten;
-    case MeasurementCategory.weight:
-      return Icons.scale;
-  }
-}
-
 /// A full-width dropdown for selecting a [Unit] from a given list.
 class _UnitDropdown extends StatelessWidget {
   const _UnitDropdown({
@@ -285,10 +266,9 @@ class _UnitDropdown extends StatelessWidget {
       initialValue: value,
       isExpanded: true,
       style: unitTextStyle,
-      decoration: InputDecoration(
-        prefixIcon: Icon(_categoryIcon(value.category)),
+      decoration: const InputDecoration(
         filled: true,
-        border: const OutlineInputBorder(
+        border: OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(12)),
         ),
       ),
